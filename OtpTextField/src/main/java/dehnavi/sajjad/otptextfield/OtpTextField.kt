@@ -14,6 +14,7 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
@@ -32,6 +33,7 @@ import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.ui.input.key.type
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
@@ -44,25 +46,57 @@ import androidx.compose.ui.unit.dp
 @Composable
 fun OtpTextField(
     numField: Int = 4,
+    value: String = "",
     borderShape: Shape = RoundedCornerShape(12.dp),
     borderColor: Color = Color.White,
     borderFocusColor: Color = Color.Blue,
     borderWidth: Dp = 1.dp,
     borderFocusWidth: Dp = 4.dp,
+    onFinishedChange: ((String) -> Unit)? = null,
 ) {
     val localFocusManager = LocalFocusManager.current
 
-    val textOtp = remember {
-        mutableStateListOf<String>().apply {
-            repeat(numField) {
-                add("")
-            }
-        }
-    }
 
     var focusIndex by remember {
         mutableStateOf(0)
     }
+
+
+    val textOtp = remember {
+        mutableStateListOf<String>().apply {
+            if (value.isNotEmpty()) {
+                repeat(numField) {
+                    val char = if (it <= value.length - 1) {
+                        value[it].toString()
+                    } else ""
+                    add(char)
+                }
+            }
+        }
+    }
+
+    var isRenderFirstItem by remember {
+        mutableStateOf(false)
+    }
+
+    LaunchedEffect(true) {
+        textOtp.forEachIndexed { index, item ->
+            if (item.isNotEmpty() && index != textOtp.size - 1) {
+                localFocusManager.moveFocus(
+                    FocusDirection.Next
+                )
+            } else {
+                focusIndex = index
+                return@forEachIndexed
+            }
+        }
+
+        //all input filled
+        if (checkIsAllInputFilled(textOtp)) {
+            onFinishedChange?.let { listener -> listener(textOtp.joinToString()) }
+        }
+    }
+
 
     LazyRow(
         horizontalArrangement = Arrangement.spacedBy(16.dp)
@@ -98,7 +132,8 @@ fun OtpTextField(
                             isFirstField,
                             localFocusManager
                         )
-                    },
+                    }
+                    .onGloballyPositioned { isRenderFirstItem = true },
                 value = textOtp[index],
                 onValueChange = {
                     handleValueChange(
@@ -109,6 +144,11 @@ fun OtpTextField(
                         localFocusManager,
                         isLastField
                     )
+
+                    //all input filled
+                    if (checkIsAllInputFilled(textOtp)) {
+                        onFinishedChange?.let { listener -> listener(textOtp.joinToString()) }
+                    }
                 },
                 textStyle = LocalTextStyle.current.copy(textAlign = TextAlign.Center),
                 keyboardActions = KeyboardActions(onNext = {
@@ -129,6 +169,11 @@ fun OtpTextField(
             )
         }
     }
+}
+
+private fun checkIsAllInputFilled(list: List<String>): Boolean {
+    list.forEach { if (it.isEmpty()) return false }
+    return true
 }
 
 @OptIn(ExperimentalComposeUiApi::class)

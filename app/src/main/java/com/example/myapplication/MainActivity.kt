@@ -1,6 +1,7 @@
 package com.example.myapplication
 
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.fillMaxSize
@@ -23,7 +24,9 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    OtpTextField(borderColor = Color.Black)
+                    OtpTextField(borderColor = Color.Black, value = "1234", onFinishedChange = {
+                        Log.d("TAG", "onCreate: $it")
+                    })
                 }
             }
         }
