@@ -1,5 +1,6 @@
 package dehnavi.sajjad.otptextfield
 
+import android.util.Log
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.border
@@ -14,12 +15,12 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusDirection
@@ -33,11 +34,12 @@ import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.ui.input.key.type
-import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
@@ -50,12 +52,16 @@ fun OtpTextField(
     borderShape: Shape = RoundedCornerShape(12.dp),
     borderColor: Color = Color.White,
     borderFocusColor: Color = Color.Blue,
+    borderWrongColor: Color = Color.Red,
     borderWidth: Dp = 1.dp,
     borderFocusWidth: Dp = 4.dp,
+    isWrong: Boolean = true,
     onFinishedChange: ((String) -> Unit)? = null,
 ) {
     val localFocusManager = LocalFocusManager.current
 
+
+    var isWrongState = isWrong
 
     var focusIndex by remember {
         mutableStateOf(0)
@@ -67,6 +73,11 @@ fun OtpTextField(
             if (value.isNotEmpty()) {
                 repeat(numField) {
                     val char = if (it <= value.length - 1) {
+                        focusIndex = if (it == value.length - 1)
+                            it
+                        else
+                            it + 1
+
                         value[it].toString()
                     } else ""
                     add(char)
@@ -75,100 +86,141 @@ fun OtpTextField(
         }
     }
 
-    var isRenderFirstItem by remember {
-        mutableStateOf(false)
+
+    //all input filled
+    if (checkIsAllInputFilled(textOtp)) {
+        onFinishedChange?.let { listener -> listener(textOtp.joinToString()) }
     }
-
-    LaunchedEffect(true) {
-        textOtp.forEachIndexed { index, item ->
-            if (item.isNotEmpty() && index != textOtp.size - 1) {
-                localFocusManager.moveFocus(
-                    FocusDirection.Next
-                )
-            } else {
-                focusIndex = index
-                return@forEachIndexed
-            }
-        }
-
-        //all input filled
-        if (checkIsAllInputFilled(textOtp)) {
-            onFinishedChange?.let { listener -> listener(textOtp.joinToString()) }
-        }
-    }
-
 
     LazyRow(
         horizontalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         items(numField) { index ->
-            val isLastField = numField - 1 == index
-            val isFirstField = index == 0
-
-            val colorBorderFocus = animateColorAsState(
-                targetValue = if (index == focusIndex) borderFocusColor else borderColor,
-                label = "COLOR"
-            )
-            val widthBorderFocus = animateDpAsState(
-                targetValue = if (index == focusIndex) borderFocusWidth else borderWidth,
-                label = "WIDTH"
-            )
-
-            BasicTextField(
-                modifier = Modifier
-                    .border(
-                        width = widthBorderFocus.value,
-                        color = colorBorderFocus.value,
-                        shape = borderShape
-                    )
-                    .width(40.dp)
-                    .height(60.dp)
-                    .onFocusChanged { if (it.isFocused) focusIndex = index }
-                    .onKeyEvent { event: KeyEvent ->
-                        handleBackspaceKeyEvent(
-                            event,
-                            index,
-                            textOtp,
-                            isFirstField,
-                            localFocusManager
-                        )
-                    }
-                    .onGloballyPositioned { isRenderFirstItem = true },
-                value = textOtp[index],
-                onValueChange = {
-                    handleValueChange(
-                        it,
-                        index,
-                        numField,
-                        textOtp,
-                        localFocusManager,
-                        isLastField
-                    )
-
-                    //all input filled
-                    if (checkIsAllInputFilled(textOtp)) {
-                        onFinishedChange?.let { listener -> listener(textOtp.joinToString()) }
-                    }
+            ItemOtpField(
+                numField,
+                index,
+                isWrongState,
+                borderWrongColor,
+                focusIndex,
+                borderFocusColor,
+                borderColor,
+                borderFocusWidth,
+                borderWidth,
+                borderShape,
+                textOtp,
+                localFocusManager,
+                disableWrongMode = { isWrongState = false },
+                onFocusChange = { newIndex ->
+                    focusIndex = newIndex
                 },
-                textStyle = LocalTextStyle.current.copy(textAlign = TextAlign.Center),
-                keyboardActions = KeyboardActions(onNext = {
-                    localFocusManager.moveFocus(
-                        FocusDirection.Next
-                    )
-                }),
-                keyboardOptions = KeyboardOptions(
-                    imeAction = if (!isLastField) ImeAction.Next else ImeAction.Done,
-                    capitalization = KeyboardCapitalization.Characters,
-                    keyboardType = KeyboardType.Decimal
-                ),
-                decorationBox = { innerTextField ->
-                    Column(verticalArrangement = Arrangement.Center) {
-                        innerTextField()
-                    }
+                onFinishedChange = onFinishedChange,
+                updateTextValue = {
+                    textOtp[index] = it
                 }
             )
         }
     }
+}
+
+@Composable
+private fun ItemOtpField(
+    numField: Int,
+    index: Int,
+    isWrong: Boolean,
+    borderWrongColor: Color,
+    focusIndex: Int,
+    borderFocusColor: Color,
+    borderColor: Color,
+    borderFocusWidth: Dp,
+    borderWidth: Dp,
+    borderShape: Shape,
+    textOtp: SnapshotStateList<String>,
+    localFocusManager: FocusManager,
+    disableWrongMode: () -> Unit,
+    onFocusChange: (Int) -> Unit,
+    updateTextValue: (String) -> Unit,
+    onFinishedChange: ((String) -> Unit)?,
+) {
+    val isLastField = numField - 1 == index
+    val isFirstField = index == 0
+
+    var textFieldValueState by remember {
+        mutableStateOf(
+            TextFieldValue(
+                text = textOtp[index]
+            )
+        )
+    }
+
+    val colorBorderFocus = animateColorAsState(
+        targetValue = if (isWrong) {
+            borderWrongColor
+        } else {
+            if (index == focusIndex) borderFocusColor else borderColor
+        }, label = "COLOR"
+    )
+    val widthBorderFocus = animateDpAsState(
+        targetValue = if (index == focusIndex || isWrong) borderFocusWidth else borderWidth,
+        label = "WIDTH"
+    )
+
+    BasicTextField(modifier = Modifier
+        .border(
+            width = widthBorderFocus.value, color = colorBorderFocus.value, shape = borderShape
+        )
+        .width(40.dp)
+        .height(60.dp)
+        .onFocusChanged {
+            if (it.isFocused && it.hasFocus) {
+                //set focus
+                onFocusChange.invoke(index)
+                //set cursor selection
+                textFieldValueState =
+                    textFieldValueState.copy(selection = TextRange(textFieldValueState.text.length))
+            }
+        }
+        .onKeyEvent { event: KeyEvent ->
+            handleBackspaceKeyEvent(
+                textFieldValueState.text, event, isFirstField, localFocusManager
+            )
+        },
+        value = textFieldValueState,
+        onValueChange = {
+            handleValueChange(
+                textFieldValueState.text,
+                it.text,
+                numField,
+                localFocusManager,
+                isLastField,
+                isWrong,
+                disableWrongMode
+            ) { updatedValue ->
+                updateTextValue.invoke(updatedValue)
+
+                textFieldValueState = textFieldValueState.copy(text = updatedValue)
+            }
+
+            //all input filled
+            if (checkIsAllInputFilled(textOtp)) {
+                onFinishedChange?.let { listener -> listener(textOtp.joinToString()) }
+            }
+        },
+        textStyle = LocalTextStyle.current.copy(textAlign = TextAlign.Center),
+        keyboardActions = KeyboardActions(onNext = {
+            localFocusManager.moveFocus(
+                FocusDirection.Next
+            )
+        }),
+        keyboardOptions = KeyboardOptions(
+            imeAction = if (!isLastField) ImeAction.Next else ImeAction.Done,
+            capitalization = KeyboardCapitalization.Characters,
+            keyboardType = KeyboardType.Decimal
+        ),
+        decorationBox = { innerTextField ->
+            Column(verticalArrangement = Arrangement.Center) {
+                innerTextField()
+            }
+        })
 }
 
 private fun checkIsAllInputFilled(list: List<String>): Boolean {
@@ -178,13 +230,12 @@ private fun checkIsAllInputFilled(list: List<String>): Boolean {
 
 @OptIn(ExperimentalComposeUiApi::class)
 private fun handleBackspaceKeyEvent(
+    text: String,
     event: KeyEvent,
-    index: Int,
-    textOtp: MutableList<String>,
     isFirstField: Boolean,
     localFocusManager: FocusManager,
 ): Boolean {
-    if (event.type == KeyEventType.KeyUp && event.key == Key.Backspace && textOtp[index].isEmpty()) {
+    if (event.type == KeyEventType.KeyUp && event.key == Key.Backspace && text.isEmpty()) {
         if (!isFirstField) {
             localFocusManager.moveFocus(FocusDirection.Previous)
         }
@@ -194,18 +245,25 @@ private fun handleBackspaceKeyEvent(
 }
 
 private fun handleValueChange(
+    oldValue: String,
     newValue: String,
-    index: Int,
     numField: Int,
-    textOtp: MutableList<String>,
     localFocusManager: FocusManager,
     isLastField: Boolean,
+    isWrong: Boolean,
+    disableWrongMode: () -> Unit,
+    updateText: (String) -> Unit,
 ) {
-    val pasteMode = (newValue.length - textOtp[index].length) == numField
+    //disable wrong mode
+    if (isWrong) {
+        disableWrongMode.invoke()
+    }
+    //handle paste mode
+    val pasteMode = (newValue.length - numField) == numField
     if (pasteMode) {
         newValue.forEachIndexed { charIndex, char ->
             if (charIndex < numField) {
-                textOtp[charIndex] = char.toString()
+                updateText.invoke(char.toString())
 
                 if (charIndex < numField - 1) {
                     localFocusManager.moveFocus(FocusDirection.Next)
@@ -214,9 +272,9 @@ private fun handleValueChange(
         }
     } else {
         if (newValue.isEmpty()) {
-            textOtp[index] = newValue
+            updateText.invoke(newValue)
         } else if (newValue.length == 1) {
-            textOtp[index] = newValue
+            updateText.invoke(newValue)
             if (!isLastField) {
                 localFocusManager.moveFocus(FocusDirection.Next)
             }
@@ -224,7 +282,15 @@ private fun handleValueChange(
             val lastChar = newValue.last().toString()
             val firstChar = newValue.first().toString()
 
-            textOtp[index] = if (textOtp[index] == firstChar) lastChar else firstChar
+            val newChar = if (oldValue == firstChar) lastChar else firstChar
+
+
+            Log.d(
+                "TAG",
+                "handleValueChange: new value $newValue  |||  first: $firstChar   ||| last: $lastChar  ||| new char: $newChar"
+            )
+
+            updateText.invoke(newChar)
 
             if (!isLastField) {
                 localFocusManager.moveFocus(FocusDirection.Next)
