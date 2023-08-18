@@ -78,18 +78,16 @@ fun OtpTextField(
 
     val textOtp = remember {
         mutableStateListOf<String>().apply {
-            if (value.isNotEmpty()) {
-                repeat(numField) {
-                    val char = if (it <= value.length - 1) {
-                        focusIndex = if (it == value.length - 1)
-                            it
-                        else
-                            it + 1
+            repeat(numField) {
+                val char = if (it <= value.length - 1) {
+                    focusIndex = if (it == value.length - 1)
+                        it
+                    else
+                        it + 1
 
-                        value[it].toString()
-                    } else ""
-                    add(char)
-                }
+                    value[it].toString()
+                } else ""
+                add(char)
             }
         }
     }
@@ -169,7 +167,7 @@ private fun ItemOtpField(
 
     val textFieldValueState =
         TextFieldValue(
-            text = if (isPasswordMode) passwordChar.toString() else textOtp[index],
+            text = if (isPasswordMode && textOtp[index].isNotEmpty()) passwordChar.toString() else textOtp[index],
             selection = TextRange(textOtp[index].length)
         )
 
@@ -279,9 +277,6 @@ private fun handleValueChange(
         pastedValue.forEachIndexed { charIndex, char ->
             if (charIndex < numField) {
                 textOtp[charIndex] = char.toString()
-
-                if (charIndex != numField - 1)
-                    localFocusManager.moveFocus(FocusDirection.Next)
             }
         }
     } else if (oldValue != newValue) {

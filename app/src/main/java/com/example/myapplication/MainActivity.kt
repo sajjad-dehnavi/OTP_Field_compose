@@ -32,7 +32,7 @@ class MainActivity : ComponentActivity() {
                             modifier = Modifier
                                 .align(Alignment.Center),
                             modifierField = Modifier.size(60.dp),
-                            value = "1234",
+                            value = "",
                             onFinishedChange = {
                                 Log.d("TAG", "result: $it")
                             }
