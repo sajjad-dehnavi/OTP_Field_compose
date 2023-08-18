@@ -3,7 +3,9 @@
 
 `otptextfield` is a custom Composable library for creating One-Time Password (OTP) input fields in Jetpack Compose. It allows you to easily integrate OTP input fields with various customization options.
 
-![OTPTextField Preview](preview.gif)
+![OTPTextField Preview](image.jpg)
+![OTPTextField Preview](gif1.gif)
+![OTPTextField Preview](gif2.gif)
 
 ## Features
 
