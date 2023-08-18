@@ -1,0 +1,75 @@
+apply plugin: 'maven-publish'
+apply plugin: 'org.jetbrains.dokka'
+
+task androidSourcesJar(type: Jar) {
+    archiveClassifier.set('sources')
+    if (project.plugins.findPlugin("com.android.library")) {
+        from android.sourceSets.main.java.srcDirs
+        from android.sourceSets.main.kotlin.srcDirs
+    } else {
+        from sourceSets.main.java.srcDirs
+        from sourceSets.main.kotlin.srcDirs
+    }
+}
+
+tasks.withType(dokkaHtmlPartial.getClass()).configureEach {
+    pluginsMapConfiguration.set(
+            ["org.jetbrains.dokka.base.DokkaBase": """{ "separateInheritedMembers": true}"""]
+    )
+}
+
+task javadocJar(type: Jar, dependsOn: dokkaJavadoc) {
+    archiveClassifier.set('javadoc')
+    from dokkaJavadoc.outputDirectory
+}
+
+artifacts {
+    archives androidSourcesJar
+    archives javadocJar
+}
+
+group = "sajjad-dehnavi"
+version = "1.0.0"
+
+afterEvaluate {
+    publishing {
+        publications {
+            release(MavenPublication) {
+                groupId "sajjad-dehnavi"
+                artifactId "otptextfield"
+                version "1.0.0"
+                if (project.plugins.findPlugin("com.android.library")) {
+                    from components.release
+                } else {
+                    from components.java
+                }
+
+                artifact androidSourcesJar
+                artifact javadocJar
+
+                pom {
+                    name = "otptextfield"
+                    description = 'Jetpack Compose OTP text field.'
+                    url = 'https://github.com/sajjad-dehnavi/OTP_Field_compose'
+                    licenses {
+                        license {
+                            name = 'The Apache Software License, Version 2.0'
+                            url = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                        }
+                    }
+                    developers {
+                        developer {
+                            id = 'sajjad-dehnavi'
+                            name = 'Sajjad Dehnavi'
+                        }
+                    }
+                    scm {
+                        connection = 'git@github.com:sajjad-dehnavi/OTP_Field_compose.git'
+                        developerConnection = 'git@github.com:sajjad-dehnavi/OTP_Field_compose.git'
+                        url = 'https://github.com/sajjad-dehnavi/OTP_Field_compose.git'
+                    }
+                }
+            }
+        }
+    }
+}

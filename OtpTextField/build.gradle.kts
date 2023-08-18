@@ -1,17 +1,34 @@
+import dehnavi.sajjad.otptextfield.Configuration
+
 @Suppress("DSL_SCOPE_VIOLATION") // TODO: Remove once KTIJ-19369 is fixed
 plugins {
     alias(libs.plugins.androidLibrary)
     alias(libs.plugins.kotlinAndroid)
+    alias(libs.plugins.dokkaGradleplugin)
 }
+
+ext {
+    val PUBLISH_GROUP_ID = Configuration.artifactGroup
+    val PUBLISH_ARTIFACT_ID = "otptextfield"
+    val PUBLISH_VERSION = "1.0.0"
+}
+
+apply(from = "${rootDir}/scripts/publish-module.gradle")
 
 android {
     namespace = "dehnavi.sajjad.otptextfield"
     compileSdk = 33
+    group = "dehnavi.sajjad"
 
     defaultConfig {
         minSdk = 21
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles("consumer-rules.pro")
+    }
+
+
+    testFixtures {
+        enable = true
     }
 
     buildTypes {
@@ -24,12 +41,12 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
 
     kotlinOptions {
-        jvmTarget = "11"
+        jvmTarget = "17"
     }
     buildFeatures {
         compose = true
@@ -42,6 +59,7 @@ android {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
         }
     }
+
 }
 
 dependencies {

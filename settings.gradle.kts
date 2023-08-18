@@ -4,6 +4,7 @@ pluginManagement {
         mavenCentral()
         gradlePluginPortal()
         maven(url = "https://jitpack.io")
+        maven(url = "https://plugins.gradle.org/m2/")
     }
 }
 dependencyResolutionManagement {
@@ -12,7 +13,9 @@ dependencyResolutionManagement {
         google()
         mavenCentral()
         maven(url = "https://jitpack.io")
+
     }
+
 }
 
 rootProject.name = "My Application"
