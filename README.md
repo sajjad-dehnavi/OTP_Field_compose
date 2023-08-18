@@ -1,6 +1,8 @@
 
 # OTPTextField Compose Library
 
+[![](https://jitpack.io/v/sajjad-dehnavi/OTP_Field_compose.svg)](https://jitpack.io/#sajjad-dehnavi/OTP_Field_compose)
+
 `otptextfield` is a custom Composable library for creating One-Time Password (OTP) input fields in Jetpack Compose. It allows you to easily integrate OTP input fields with various customization options.
 
 ![OTPTextField Preview](image.jpg)
@@ -20,7 +22,7 @@
 Add the following dependency to your app's build.gradle file:
 
 ```gradle
-implementation "com.github.sajjad-dehnavi:otptextfield:1.0.0"
+implementation "com.github.sajjad-dehnavi:OTP_Field_compose:1.0.0"
 ```
 ## Usage
 
