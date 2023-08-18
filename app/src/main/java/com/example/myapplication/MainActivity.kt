@@ -1,6 +1,5 @@
 package com.example.myapplication
 
-import android.annotation.SuppressLint
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
@@ -19,7 +18,6 @@ import com.example.myapplication.ui.theme.MyApplicationTheme
 import dehnavi.sajjad.otptextfield.OtpTextField
 
 class MainActivity : ComponentActivity() {
-    @SuppressLint("CoroutineCreationDuringComposition")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
@@ -32,7 +30,6 @@ class MainActivity : ComponentActivity() {
                     Box(modifier = Modifier.fillMaxSize()) {
                         OtpTextField(
                             modifier = Modifier
-                                .fillMaxSize()
                                 .align(Alignment.Center),
                             modifierField = Modifier.size(60.dp),
                             value = "1234",
