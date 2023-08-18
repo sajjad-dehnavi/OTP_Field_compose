@@ -1,16 +1,9 @@
-import dehnavi.sajjad.otptextfield.Configuration
 
 @Suppress("DSL_SCOPE_VIOLATION") // TODO: Remove once KTIJ-19369 is fixed
 plugins {
     alias(libs.plugins.androidLibrary)
     alias(libs.plugins.kotlinAndroid)
     alias(libs.plugins.dokkaGradleplugin)
-}
-
-ext {
-    val PUBLISH_GROUP_ID = Configuration.artifactGroup
-    val PUBLISH_ARTIFACT_ID = "otptextfield"
-    val PUBLISH_VERSION = "1.0.0"
 }
 
 apply(from = "${rootDir}/scripts/publish-module.gradle")

@@ -29,7 +29,7 @@ artifacts {
 }
 
 group = "sajjad-dehnavi"
-version = "1.0.0"
+version = "1.0"
 
 afterEvaluate {
     publishing {
@@ -37,7 +37,7 @@ afterEvaluate {
             release(MavenPublication) {
                 groupId "sajjad-dehnavi"
                 artifactId "otptextfield"
-                version "1.0.0"
+                version "1.0"
                 if (project.plugins.findPlugin("com.android.library")) {
                     from components.release
                 } else {
