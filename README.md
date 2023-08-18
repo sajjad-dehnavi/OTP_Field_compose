@@ -41,8 +41,9 @@ numField = 4,
 value = "", 
 // ... other parameters
 onFinishedChange = { otpValue -> 
- // Handle the OTP value }
-  )
+ // Handle the OTP value
+ }
+)
 ```
 
 ## Parameters
