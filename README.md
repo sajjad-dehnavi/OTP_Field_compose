@@ -22,7 +22,7 @@
 Add the following dependency to your app's build.gradle file:
 
 ```gradle
-implementation "com.github.sajjad-dehnavi:OTP_Field_compose:1.0.0"
+implementation "com.github.sajjad-dehnavi:OTP_Field_compose:1.0"
 ```
 ## Usage
 
