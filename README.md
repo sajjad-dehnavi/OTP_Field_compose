@@ -19,6 +19,18 @@
 
 ## Installation
 
+Add JitPack to your project build.gradle
+
+```gradle
+allprojects {
+  repositories {
+    ...
+    maven { url 'https://jitpack.io' }
+   }
+}
+```
+
+
 Add the following dependency to your app's build.gradle file:
 
 ```gradle
