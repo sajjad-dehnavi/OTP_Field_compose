@@ -95,7 +95,7 @@ fun OtpTextField(
 
     //all input filled
     if (checkIsAllInputFilled(textOtp)) {
-        onFinishedChange?.let { listener -> listener(textOtp.joinToString()) }
+        onFinishedChange?.let { listener -> listener(textOtp.joinToString(separator = "")) }
     }
 
     LazyRow(
