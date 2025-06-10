@@ -13,8 +13,8 @@ android {
         applicationId = "com.example.myapplication"
         minSdk = 21
         targetSdk = 36
-        versionCode = 3
-        versionName = "1.0.2"
+        versionCode = 4
+        versionName = "1.0.3"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -23,7 +23,10 @@ android {
     }
 
     publishing {
-        singleVariant("release")
+        singleVariant("release") {
+            withSourcesJar()
+            withJavadocJar()
+        }
     }
 
     buildTypes {
@@ -62,5 +65,4 @@ dependencies {
     implementation(project(":OtpTextField"))
 
 
-    
 }

@@ -1,10 +1,10 @@
-
 @Suppress("DSL_SCOPE_VIOLATION") // TODO: Remove once KTIJ-19369 is fixed
 plugins {
     alias(libs.plugins.androidLibrary)
     alias(libs.plugins.kotlinAndroid)
     alias(libs.plugins.dokkaGradleplugin)
     alias(libs.plugins.compose.compiler)
+    id("maven-publish")
 }
 
 apply(from = "${rootDir}/scripts/publish-module.gradle")
@@ -34,6 +34,14 @@ android {
             )
         }
     }
+
+    publishing {
+        singleVariant("release") {
+            withSourcesJar()
+            withJavadocJar() // اختیاری، اگه Javadoc نداری حذفش کن
+        }
+    }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
@@ -43,16 +51,22 @@ android {
         jvmTarget = "17"
     }
 
-    publishing {
-        singleVariant("release")
-    }
-
     packaging {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
         }
     }
 
+}
+
+publishing {
+    publications {
+        withType<MavenPublication>().matching { it.name == "release" }.configureEach {
+            groupId = "dehnavi.sajjad.otptextfield"
+            artifactId = "OtpTextField"
+            version = "1.0.3"
+        }
+    }
 }
 
 dependencies {
