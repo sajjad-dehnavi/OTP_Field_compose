@@ -1,5 +1,6 @@
 package dehnavi.sajjad.otptextfield
 
+import android.database.Cursor
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.border
@@ -11,6 +12,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
@@ -26,6 +28,7 @@ import androidx.compose.ui.focus.FocusManager
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.KeyEvent
 import androidx.compose.ui.input.key.KeyEventType
@@ -63,6 +66,7 @@ fun OtpTextField(
     borderWidth: Dp = 1.5.dp,
     borderFocusWidth: Dp = 4.dp,
     isWrong: Boolean = false,
+    cursorColor: Color = MaterialTheme.colorScheme.background,
     paddingFieldValue: Dp = 12.dp,
     onFinishedChange: ((String) -> Unit)? = null,
 ) {
@@ -130,6 +134,7 @@ fun OtpTextField(
                 disableWrongMode = { isWrongState = false },
                 textStyle = textStyle,
                 textSizePassword = textSizePassword,
+                cursorColor = cursorColor,
                 onFocusChange = { newIndex ->
                     focusIndex = newIndex
                 },
@@ -157,6 +162,7 @@ private fun ItemOtpField(
     colorBorder: Color,
     passwordChar: Char,
     isPasswordMode: Boolean,
+    cursorColor: Color = MaterialTheme.colorScheme.background,
     disableWrongMode: () -> Unit,
     onFocusChange: (Int) -> Unit,
     updateTextValue: (String) -> Unit,
@@ -171,24 +177,25 @@ private fun ItemOtpField(
             selection = TextRange(textOtp[index].length)
         )
 
-    BasicTextField(modifier = modifier
-        .border(
-            width = widthBorder, color = colorBorder, shape = borderShape
-        )
-        .onFocusChanged {
-            if (it.isFocused && it.hasFocus) {
-                //set focus
-                onFocusChange.invoke(index)
-            }
-        }
-        .onKeyEvent { event: KeyEvent ->
-            handleBackspaceKeyEvent(
-                text = textFieldValueState.text,
-                event = event,
-                isFirstField = isFirstField,
-                localFocusManager = localFocusManager
+    BasicTextField(
+        modifier = modifier
+            .border(
+                width = widthBorder, color = colorBorder, shape = borderShape
             )
-        },
+            .onFocusChanged {
+                if (it.isFocused && it.hasFocus) {
+                    //set focus
+                    onFocusChange.invoke(index)
+                }
+            }
+            .onKeyEvent { event: KeyEvent ->
+                handleBackspaceKeyEvent(
+                    text = textFieldValueState.text,
+                    event = event,
+                    isFirstField = isFirstField,
+                    localFocusManager = localFocusManager
+                )
+            },
         value = textFieldValueState,
         onValueChange = {
             handleValueChange(
@@ -209,6 +216,7 @@ private fun ItemOtpField(
                 onFinishedChange?.let { listener -> listener(textOtp.joinToString("")) }
             }
         },
+        cursorBrush = SolidColor(cursorColor),
         textStyle = textStyle.copy(
             textAlign = TextAlign.Center,
             fontSize = if (isPasswordMode) textSizePassword else textStyle.fontSize

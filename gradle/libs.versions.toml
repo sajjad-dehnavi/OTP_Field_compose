@@ -1,17 +1,17 @@
 [versions]
-agp = "8.1.0"
-dokka-gradle-plugin = "1.8.20"
-kotlin = "1.8.10"
-core-ktx = "1.9.0"
+agp = "8.10.1"
+dokka-gradle-plugin = "2.0.0"
+kotlin = "2.1.21"
+core-ktx = "1.16.0"
 junit = "4.13.2"
 androidx-test-ext-junit = "1.1.5"
 espresso-core = "3.5.1"
-lifecycle-runtime-ktx = "2.6.1"
-activity-compose = "1.7.2"
-compose-bom = "2023.03.00"
+lifecycle-runtime-ktx = "2.9.1"
+activity-compose = "1.10.1"
+compose-bom = "2025.06.00"
 appcompat = "1.6.1"
 material = "1.9.0"
-publish-plugin = "1.3.0"
+publish-plugin = "2.0.0"
 
 [libraries]
 core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "core-ktx" }
@@ -38,3 +38,4 @@ kotlinAndroid = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 androidLibrary = { id = "com.android.library", version.ref = "agp" }
 publishPlugin = { id = "io.github.gradle-nexus.publish-plugin", version.ref = "publish-plugin" }
 dokkaGradleplugin = { id = "org.jetbrains.dokka", version.ref = "dokka-gradle-plugin" }
+compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }

@@ -4,13 +4,14 @@ plugins {
     alias(libs.plugins.androidLibrary)
     alias(libs.plugins.kotlinAndroid)
     alias(libs.plugins.dokkaGradleplugin)
+    alias(libs.plugins.compose.compiler)
 }
 
 apply(from = "${rootDir}/scripts/publish-module.gradle")
 
 android {
     namespace = "dehnavi.sajjad.otptextfield"
-    compileSdk = 33
+    compileSdk = 36
     group = "dehnavi.sajjad"
 
     defaultConfig {
@@ -41,12 +42,11 @@ android {
     kotlinOptions {
         jvmTarget = "17"
     }
-    buildFeatures {
-        compose = true
+
+    publishing {
+        singleVariant("release")
     }
-    composeOptions {
-        kotlinCompilerExtensionVersion = "1.4.3"
-    }
+
     packaging {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
@@ -57,6 +57,7 @@ android {
 
 dependencies {
 
+    implementation(libs.lifecycle.runtime.ktx)
     implementation(libs.core.ktx)
     implementation(libs.material)
     implementation(platform(libs.compose.bom))
@@ -64,7 +65,5 @@ dependencies {
     implementation(libs.ui.graphics)
     implementation(libs.ui.tooling.preview)
     implementation(libs.material3)
-    debugImplementation(libs.ui.tooling)
-    debugImplementation(libs.ui.test.manifest)
 
 }
